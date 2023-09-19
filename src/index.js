@@ -1,98 +1,6 @@
-// остановился на 14.45
-
-class Column {
-  constructor(type, speed) {
-    this.type = type;
-    this.speed = speed;
-    this.car = null;
-  }
-}
-
-
-// column
-
-
-
-class Station {
-  constructor(typeStation) {
-    this.typeStation = typeStation;
-    this.queue = [];
-    this.filling = [];
-    this.ready = [];
-  }
-
-  init() {
-    for (const optionStation of this.typeStation) {
-      for (let i = 0; i < optionStation.count; i++) {
-        this.filling.push(new Column(optionStation.type, optionStation.speed))
-      }
-    };
-
-    setInterval(() => {
-      this.checkQueueToFilling();
-    }, 2000);
-  };
-
-  checkQueueToFilling() {
-    if (this.queue.length) {
-      for (let i = 0; i < this.queue.length; i++) {
-        for (let k = 0; k < this.filling.length; k++) {
-          if(!this.filling[k].car && this.queue[i].typeFuel === this.filling[k].typeFuel) {
-            this.filling[k].car = this.queue.splice(i, 1)[0];
-          
-          }
-        }
-
-      }
-    }
-  }
-}
-
-
-// станция
-
-
-class Car1 {
-  constructor(brand, model, maxTank) {
-    this.brand = brand;
-    this.model = model;
-    this.maxTank = maxTank;
-    this.nowTank = Math.floor(Math.random() * maxTank);
-  };
-
-  needPetrol() {
-    return this.maxTank - this.nowTank;
-  }
-
-  fillUp() {
-    this.nowTank = this.maxTank;
-  }
-};
-
-class PassangerCar extends Car1 {
-  typeCar = 'passenger';
-
-  constructor(brand, model, maxTank, typeFuel = 'petrol') {
-    super(brand, model.maxTank);
-    this.typeFuel = typeFuel;
-  };
-}
-
-class Truck extends Car1 {
-  typeCar = 'Truck';
-
-  constructor(brand, model, maxTank, typeFuel = 'diesel') {
-    super(brand, model, maxTank);
-    this.typeFuel = typeFuel;
-  }
-}
-
-
-
-// переписать на модули
-// import './style.css';
-
-
+import './style.css';
+import {Station} from './modules/station';
+import {PassangerCar, Truck} from './modules/car';
 
 const open = document.querySelector('.open');
 const car = document.querySelector('.car');
@@ -104,7 +12,7 @@ const testArray = {
     ['Mazda', 'cx-5', 55],
     ['BMW', 'M5', 68],
     ['BMW', 'X5', 80],
-    ['BMW', 'X5d', 80, 'diesel'],
+    ['BMW', 'X5d', 80],
     ['BMW', 'X3', 65],
     ['BMW', '5', 66],
   ],
@@ -123,23 +31,29 @@ const getTestCar = () => {
   const typeBool = Math.random() < 0.6;
   const listCar = typeBool ? testArray.passangerCar : testArray.truck;
   const randomCar = listCar[(Math.floor(Math.random() * listCar.length))];
+  console.log('randomCar', randomCar);
+  console.log('new PassangerCar(...randomCar)', ...randomCar);
   return typeBool ? new PassangerCar(...randomCar) : new Truck(...randomCar);
 };
-
 
 
 const station = new Station([
   {
     type: 'petrol',
-    count: 2,
+    count: 1,
     speed: 5,
   },
   {
     type: 'diesel',
     count: 1,
     speed: 10,
+  },
+  {
+    type: 'gaz',
+    count: 1,
+    speed: 5,
   }
-]);
+], '.app');
 
 open.addEventListener('click', () => {
   station.init();
@@ -148,6 +62,7 @@ open.addEventListener('click', () => {
   car.style.display = 'block';
   car.addEventListener('click', () => {
     station.addCarQueue(getTestCar());
+    console.log('getTestCar()', getTestCar());
   });
 });
 
